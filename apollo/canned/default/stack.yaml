@@ -1,0 +1,12 @@
+resolver: lts-13.24
+ghc-options:
+  rg: -Wall -Werror
+package-indices:
+  - name:            Hackage
+    http:            http://hackage.haskell.org/01-index.tar.gz
+    download-prefix: http://hackage.haskell.org/package/
+  - name:            Iris Connect Private Hackage
+    http:            http://h.irisconnect.net:9000/01-index.tar.gz
+    download-prefix: http://h.irisconnect.net:9000/package/
+packages:
+  - '.'

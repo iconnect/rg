@@ -1,0 +1,17 @@
+packages: .
+
+package rg
+    ghc-options: -Wall -Werror
+
+constraints: base >=0
+           , array                    == 0.5.3.0
+           , base                     == 4.12.0.0
+           , deepseq                  == 1.4.4.0
+           , ghc-prim                 == 0.5.3
+           , integer-gmp              == 1.0.2.0
+           , primitive                == 0.6.4.0
+           , rts                      == 1.0
+           , transformers             == 0.5.6.2
+           , vector                   == 0.12.0.3
+
+

@@ -1,0 +1,9 @@
+resolver: lts-13.24
+
+local-ghc-options:
+- -Wall
+- -Werror
+
+configs:
+  default:
+    info: "default config: all dependencies from Hackage"

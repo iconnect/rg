@@ -1,0 +1,41 @@
+name:                rg
+version:             1.0.0.0
+github:              "cdornan/rg"
+license:             BSD3
+author:              "Chris Dornan"
+maintainer:          "chris@chrisdornan.com"
+copyright:           "2019 Chris Dornan"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+synopsis:            A dynamic/unbounded alternative to Bounded Enum
+category:            Types
+
+description:         Please see the README on GitHub at <https://github.com/cdornan/rg#readme>
+
+dependencies:
+- base >= 4.10 && < 5
+- array
+- vector
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+library:
+  source-dirs: src
+
+tests:
+  nike-test:
+    main:                test.hs
+    source-dirs:         test
+    ghc-options:
+    - -with-rtsopts "-T -N -qg -qb -H1024m -I0"
+    - -threaded
+    - -rtsopts
+    dependencies:
+    - rg
+    - tasty
+    - tasty-hunit
