@@ -1,5 +1,5 @@
 name:                rg
-version:             1.0.0.0
+version:             1.0.1.0
 github:              "cdornan/rg"
 license:             BSD3
 author:              "Chris Dornan"
@@ -18,6 +18,11 @@ description:         Please see the README on GitHub at <https://github.com/cdor
 dependencies:
 - base >= 4.10 && < 5
 - array
+- fmt
+- enum-text
+- possibly
+- text
+- unordered-containers
 - vector
 
 ghc-options:

@@ -1,7 +1,11 @@
-{-# LANGUAGE RecordWildCards        #-}
+{-# LANGUAGE RecordWildCards            #-}
+{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Data.Rg
   ( Rg(..)
+  , RgText(..)
+  , BE(..)
   , Range
   , newStartOfRangeFromList
   , newStartOfRangeFromVector
@@ -9,8 +13,13 @@ module Data.Rg
   ) where
 
 import           Data.Array
+import qualified Data.HashMap.Strict  as HM
 import           Data.Maybe
-import qualified Data.Vector        as V
+import           Data.Possibly
+import qualified Data.Text            as T
+import qualified Data.Vector          as V
+import           Fmt
+-- import           Text.Enum.Text
 
 
 -- | Rg acts a bit like a Bounded Enum, but the size of the enumeration
@@ -65,14 +74,57 @@ class Rg rg where
   vectorRg rg is = V.fromList $ listRg rg is
 
 
+-------------------------------------------------------------------------------
+-- class RgText
+-------------------------------------------------------------------------------
+
+-- | a class in which we can build things and parse them from 'T.Text'
+class (Rg e, Buildable e, Eq e, Ord e, Show e) => RgText e where
+  parseRgText :: e -> T.Text -> Possibly e
+  parseRgText e txt = maybe (Left msg) Right $ HM.lookup txt $ hashmap_t e
+    where
+      msg = "parseRgText: enumeration not recognised: "++show txt
+
+
+-------------------------------------------------------------------------------
+-- newtype BE
+-------------------------------------------------------------------------------
+
+-- | a @newtype@ wrapper used for deriving 'Rg' instances from 'Bounded' 'Enum'
+newtype BE a = BE { _BE :: a }
+  deriving  (Eq,Ord,Bounded,Enum,Show)
+
+instance (Bounded i,Enum i) => Rg (BE i) where
+  sizeRg be = (1 +) $ fromEnum $ maxBound `asTypeOf` _BE be
+
+  toRg be i = case 0 <= i && i < sizeRg be of
+    True  -> Just $ BE $ toEnum i
+    False -> Nothing
+
+  fromRg = fromEnum . _BE
+
+
+-------------------------------------------------------------------------------
+-- data Range
+-------------------------------------------------------------------------------
+
+-- | used to generate 'Rg' values from lists of things
 data Range a =
   Range
-    { _rg_size  :: Int
-    , _rg_elem  :: Int
-    , _rg_array :: Array Int a
+    { _rg_size  :: Int          -- ^ number of items in enumeration (derivable from Array)
+    , _rg_elem  :: Int          -- ^ position in the enumeration of this element
+    , _rg_array :: Array Int a  -- ^ all of the elements of the enumeration
     }
   deriving (Show)
 
+instance Rg (Range a) where
+  sizeRg      = _rg_size
+  toRg   rg i = case 0 <= i && i < _rg_size rg of
+    False -> Nothing
+    True  -> Just rg { _rg_elem = i }
+  fromRg      = _rg_elem
+
+-- | generating a 'Range' from a list
 newStartOfRangeFromList :: [a] -> Range a
 newStartOfRangeFromList xs =
   Range
@@ -83,6 +135,7 @@ newStartOfRangeFromList xs =
   where
     sz = length xs
 
+-- | generating a 'Range' from a 'V.Vector'
 newStartOfRangeFromVector :: V.Vector a -> Range a
 newStartOfRangeFromVector v =
   Range
@@ -93,12 +146,18 @@ newStartOfRangeFromVector v =
   where
     sz = V.length v
 
+-- | extracting the thing
 extractRange :: Range a -> a
 extractRange Range{..} = _rg_array ! _rg_elem
 
-instance Rg (Range a) where
-  sizeRg      = _rg_size
-  toRg   rg i = case 0 <= i && i < _rg_size rg of
-    False -> Nothing
-    True  -> Just rg { _rg_elem = i }
-  fromRg      = _rg_elem
+
+-------------------------------------------------------------------------------
+-- hashmap_t
+-------------------------------------------------------------------------------
+
+-- | 'T.Text' 'HM.HashMap' based on 'renderEnumText' representation
+hashmap_t :: RgText e => e -> HM.HashMap T.Text e
+hashmap_t x = HM.fromList
+    [ (fmt $ build c,c)
+      | c <- allListRg x
+      ]
