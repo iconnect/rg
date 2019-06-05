@@ -19,7 +19,6 @@ import           Data.Possibly
 import qualified Data.Text            as T
 import qualified Data.Vector          as V
 import           Fmt
--- import           Text.Enum.Text
 
 
 -- | Rg acts a bit like a Bounded Enum, but the size of the enumeration

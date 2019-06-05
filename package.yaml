@@ -1,5 +1,5 @@
 name:                rg
-version:             1.0.1.0
+version:             1.0.1.1
 github:              "cdornan/rg"
 license:             BSD3
 author:              "Chris Dornan"
@@ -19,7 +19,6 @@ dependencies:
 - base >= 4.10 && < 5
 - array
 - fmt
-- enum-text
 - possibly
 - text
 - unordered-containers
