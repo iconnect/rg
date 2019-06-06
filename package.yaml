@@ -1,24 +1,24 @@
-name:                rg
-version:             1.1.0.0
-github:              "cdornan/rg"
-license:             BSD3
-author:              "Chris Dornan"
-maintainer:          "chris@chrisdornan.com"
-copyright:           "2019 Chris Dornan"
+name:                 rg
+version:              1.2.0.0
+github:               "cdornan/rg"
+license:              BSD3
+author:               "Chris Dornan"
+maintainer:           "chris.dornan@irisconnect.co.uk"
+copyright:            "2019 Chris Dornan"
 
 extra-source-files:
 - README.md
 - ChangeLog.md
 
-synopsis:            A dynamic/unbounded alternative to Bounded Enum
-category:            Types
+synopsis:             A dynamic/unbounded alternative to Bounded Enum
+category:             Types
 
-description:         Please see the README on GitHub at <https://github.com/cdornan/rg#readme>
+description:          Please see the README on GitHub at <https://github.com/cdornan/rg#readme>
 
 dependencies:
-- base >= 4.10 && < 5
+- base                >= 4.10 && < 5
 - array
-- fmt
+- fmt                 >= 0.4.0.0
 - possibly
 - text
 - unordered-containers

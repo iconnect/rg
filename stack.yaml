@@ -1,0 +1,5 @@
+resolver: lts-13.24
+ghc-options:
+  rg: -Wall -Werror
+packages:
+  - '.'

@@ -1,5 +1,3 @@
-/stack.yaml
-/cabal.project
 .stack-work/
 rg.cabal
 *~
