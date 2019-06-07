@@ -1,9 +1,12 @@
 {-# LANGUAGE RecordWildCards            #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 
 module Data.Rg
   ( Rg(..)
+  , RgCoreMethods
+  , rgCoreMethodsBE
   , RgText(..)
   , BE(..)
   , Range
@@ -13,6 +16,7 @@ module Data.Rg
   ) where
 
 import           Data.Array
+import           Data.Coerce
 import qualified Data.HashMap.Strict  as HM
 import           Data.Maybe
 import           Data.Possibly
@@ -25,52 +29,90 @@ import           Fmt
 -- can be dynamically determined from each value in the type (see 'sizeRg')
 class Rg rg where
   -- | the number of values in the enumeration; sizeRg sz > 0
-  sizeRg      :: rg -> Int
+  sizeRg        :: rg -> Int
+  sizeRg = _rcm_sizeRg rgCoreMethods
 
   -- | the nth item in the enumeration (first is 0)
-  toRg        :: rg -> Int -> Maybe rg
+  toRg          :: rg -> Int -> Maybe rg
+  toRg   = _rcm_toRg   rgCoreMethods
 
   -- | place in the enumation (first is 0)
-  fromRg      :: rg -> Int
+  fromRg        :: rg -> Int
+  fromRg = _rcm_fromRg rgCoreMethods
+
+  -- | an alternative way of specifying sizeRg, toRg and fromRg
+  rgCoreMethods :: RgCoreMethods rg
+  rgCoreMethods =
+    RgCoreMethods
+      { _rcm_sizeRg = sizeRg
+      , _rcm_toRg   = toRg
+      , _rcm_fromRg = fromRg
+      }
+
+  {-# MINIMAL sizeRg, toRg, fromRg | rgCoreMethods #-}
 
   -- | first item in the enumeration
-  minRg       :: rg -> rg
-  minRg    = fromMaybe oops . flip toRg 0
+  minRg         :: rg -> rg
+  minRg     = fromMaybe oops . flip toRg 0
     where
-      oops = error "minRg: no minimum value in range"
+      oops  = error "minRg: no minimum value in range"
 
   -- | last item in the enumeration
-  maxRg       :: rg -> rg
-  maxRg rg = fromMaybe oops $ toRg rg n
+  maxRg         :: rg -> rg
+  maxRg rg  = fromMaybe oops $ toRg rg n
     where
-      n    = sizeRg rg - 1
-      oops = error "maxRg: no maximum value in range"
+      n     = sizeRg rg - 1
+      oops  = error "maxRg: no maximum value in range"
 
   -- | next item in the enumeration (Nothing if already last)
-  succRg      :: rg -> Maybe rg
+  succRg        :: rg -> Maybe rg
   succRg rg = toRg rg $ fromRg rg + 1
 
   -- | previous item in the enumeration (Nothing if already first)
-  predRg      :: rg -> Maybe rg
+  predRg        :: rg -> Maybe rg
   predRg rg = toRg rg $ fromRg rg - 1
 
   -- | list given items in the enumeration
-  allListRg   :: rg -> [rg]
+  allListRg     :: rg -> [rg]
   allListRg rg = listRg rg [0..]
 
   -- | list given items in the enumeration, stopping as soon as an index is
   -- out of range
-  listRg      :: rg -> [Int] -> [rg]
+  listRg        :: rg -> [Int] -> [rg]
   listRg rg is = catMaybes $ takeWhile isJust [ toRg rg i | i<-is ]
 
   -- | list given items in the enumeration as a 'V.Vector'
-  allVectorRg :: rg -> [rg]
+  allVectorRg   :: rg -> [rg]
   allVectorRg rg = listRg rg [0..]
 
   -- | list the items in the enumeration as a 'V.Vector', stopping as soon as an
   -- index is out of range
   vectorRg    :: rg -> [Int] -> V.Vector rg
   vectorRg rg is = V.fromList $ listRg rg is
+
+
+
+-------------------------------------------------------------------------------
+-- RgCoreMethods
+-------------------------------------------------------------------------------
+
+-- | dynamically encapsulates the core 'Rg' methods
+data RgCoreMethods rg =
+  RgCoreMethods
+    { _rcm_sizeRg :: rg -> Int
+    , _rcm_toRg   :: rg -> Int -> Maybe rg
+    , _rcm_fromRg :: rg -> Int
+    }
+
+-- | if you want to create an 'Rg' from a 'Bounded' 'Enum' you can bind
+-- 'rgCoreMethods' to this function
+rgCoreMethodsBE :: forall rg . (Bounded rg, Enum rg) => RgCoreMethods rg
+rgCoreMethodsBE =
+    RgCoreMethods
+      { _rcm_sizeRg = coerce (sizeRg :: BE rg -> Int)
+      , _rcm_toRg   = coerce (toRg   :: BE rg -> Int -> Maybe (BE rg))
+      , _rcm_fromRg = coerce (fromRg :: BE rg -> Int)
+      }
 
 
 -------------------------------------------------------------------------------
@@ -154,7 +196,6 @@ extractRange Range{..} = _rg_array ! _rg_elem
 -- hashmap_t
 -------------------------------------------------------------------------------
 
--- | 'T.Text' 'HM.HashMap' based on 'renderEnumText' representation
 hashmap_t :: RgText e => e -> HM.HashMap T.Text e
 hashmap_t x = HM.fromList
     [ (fmt $ build c,c)

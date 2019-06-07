@@ -38,6 +38,16 @@ main = defaultMain $
       , testCase "fromRg False"   $ 0                  @=? fromRg    (BE False)
       , testCase "fromRg True"    $ 1                  @=? fromRg    (BE True )
       ]
+    , testGroup "rgCoreMethodsBE"
+      [ testCase "sizeRg True"    $ 2                  @=? sizeRg    True
+      , testCase "sizeRg False"   $ 2                  @=? sizeRg    False
+      , testCase "toRg 0"         $ Just False         @=? toRg      False 0
+      , testCase "toRg 1"         $ Just True          @=? toRg      False 1
+      , testCase "toRg 3"         $ Nothing            @=? toRg      False 2
+      , testCase "allListRg"      $ [False,True]       @=? allListRg False
+      , testCase "fromRg False"   $ 0                  @=? fromRg    False
+      , testCase "fromRg True"    $ 1                  @=? fromRg    True
+      ]
     , testGroup "RgText"
       [ testCase "TRUE"    $ Right (BE True ) @=? parseRgText (BE False) "TRUE"
       , testCase "FALSE"   $ Right (BE False) @=? parseRgText (BE True ) "FALSE"
@@ -52,6 +62,8 @@ main = defaultMain $
     msg = "parseRgText: enumeration not recognised: \"false\""
 
 instance RgText (BE Bool)
+
+instance Rg Bool where rgCoreMethods = rgCoreMethodsBE
 
 instance Buildable (BE Bool) where
   build (BE True)  = "TRUE"
