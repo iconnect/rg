@@ -1,3 +1,4 @@
-.stack-work/
-rg.cabal
+/.dist-newstyle
+/.stack-work/
+/rg.cabal
 *~

@@ -1,32 +1,31 @@
-name:                 rg
-version:              1.3.0.0
-github:               "cdornan/rg"
-license:              BSD3
-author:               "Chris Dornan"
-maintainer:           "chris.dornan@irisconnect.co.uk"
-copyright:            "2019 Chris Dornan"
+name:           rg
+version:        1.4.0.0
+github:         "cdornan/rg"
+license:        BSD3
+author:         "Chris Dornan"
+maintainer:     "chris.dornan@irisconnect.co.uk"
+copyright:      "2019 Chris Dornan"
 
 extra-source-files:
 - README.md
 - ChangeLog.md
 
-synopsis:             A dynamic/unbounded alternative to Bounded Enum
-category:             Types
+synopsis:       A dynamic/unbounded alternative to Bounded Enum
+category:       Types
 
-description:          Please see the README on GitHub at <https://github.com/cdornan/rg#readme>
+description:    Please see the README on GitHub at <https://github.com/cdornan/rg#readme>
 
 dependencies:
-- base                >= 4.10 && < 5
+- base                  >= 4.8 && < 5
 - array
-- fmt                 >= 0.4.0.0
+- fmt                   >= 0.4.0.0
 - possibly
-- text
-- unordered-containers
-- vector
+- text                  >= 1.2
+- unordered-containers  >= 0.2.0.0
+- vector                >= 0.11.0.0
 
 ghc-options:
 - -Wall
-- -Wcompat
 
 library:
   source-dirs: src
@@ -36,7 +35,6 @@ tests:
     main:                test.hs
     source-dirs:         test
     ghc-options:
-    - -with-rtsopts "-T -N -qg -qb -H1024m -I0"
     - -threaded
     - -rtsopts
     dependencies:

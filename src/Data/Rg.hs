@@ -5,7 +5,7 @@
 
 module Data.Rg
   ( Rg(..)
-  , RgCoreMethods
+  , RgCoreMethods(..)
   , rgCoreMethodsBE
   , RgText(..)
   , BE(..)
